@@ -1,0 +1,169 @@
+unit dblatihan1;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, DB, ADODB, ExtCtrls, TeeProcs, TeEngine, Chart, DbChart, Grids,
+  DBGrids, StdCtrls, Series, Buttons, frxClass, frxDBSet, ImgList;
+
+type
+  TForm5 = class(TForm)
+    ADOConnection1: TADOConnection;
+    ADOQuery1: TADOQuery;
+    DataSource1: TDataSource;
+    DBGrid1: TDBGrid;
+    Chart1: TChart;
+    Series1: TBarSeries;
+    frxDBDataset1: TfrxDBDataset;
+    frxReport1: TfrxReport;
+    ADOQuery2: TADOQuery;
+    frxDBDataset2: TfrxDBDataset;
+    frxReport2: TfrxReport;
+    BitBtn1: TBitBtn;
+    BitBtn5: TBitBtn;
+    BitBtn4: TBitBtn;
+    BitBtn2: TBitBtn;
+    Edit1: TEdit;
+    BitBtn3: TBitBtn;
+    ComboBox1: TComboBox;
+    procedure Button1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure BitBtn3Click(Sender: TObject);
+    procedure BitBtn4Click(Sender: TObject);
+    procedure frxReport1ClickObject(View: TfrxView; Button: TMouseButton;
+      Shift: TShiftState; var Modified: Boolean);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure BitBtn5Click(Sender: TObject);
+    procedure BitBtn2Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form5: TForm5;
+
+implementation
+
+uses formtambahdata;
+
+
+{$R *.dfm}
+
+procedure TForm5.Button1Click(Sender: TObject);
+var i:Integer;
+begin
+ADOQuery1.SQL.Clear;
+ADOQuery1.SQL.Add('select Count(no)as jumlah_kelas,sum(kehadiran_total) as total_siswa,kelas as nama_kelas from jadwal_tabel group by kelas');
+ADOQuery1.Open;
+for i:=1 to ADOQuery1.RecordCount do
+begin
+Chart1.Series[0].Add(StrToInt(ADOQuery1.fieldbyname('total_siswa').AsString),ADOQuery1.Fields[2].AsString);
+ADOQuery1.Next;
+end;
+end;
+
+procedure TForm5.FormShow(Sender: TObject);
+begin
+Edit1.Text:='';
+DBGrid1.Columns[0].Width:=20;
+DBGrid1.Columns[1].Width:=70;
+DBGrid1.Columns[2].Width:=70;
+DBGrid1.Columns[3].Width:=100;
+DBGrid1.Columns[4].Width:=90;
+DBGrid1.Columns[5].Width:=60;
+DBGrid1.Columns[6].Width:=130;
+DBGrid1.Columns[7].Width:=80;
+DBGrid1.Columns[8].Width:=50;
+end;
+
+procedure TForm5.BitBtn3Click(Sender: TObject);
+begin
+if ComboBox1.ItemIndex = 0 then
+begin
+with ADOQuery1 do
+  begin
+  Close;
+  SQL.Clear;
+  SQL.Add('Select * FROM jadwal_tabel WHERE hari Like' + QuotedStr('%'+Edit1.Text+'%'));
+  Open;
+  end;
+end else if ComboBox1.ItemIndex = 1 then
+begin
+with ADOQuery1 do
+  begin
+  Close;
+  SQL.Clear;
+  SQL.Add('Select * FROM jadwal_tabel WHERE matkul Like' + QuotedStr('%'+Edit1.Text+'%'));
+  Open;
+  end;
+end else if ComboBox1.ItemIndex = 2 then
+begin
+with ADOQuery1 do
+  begin
+  Close;
+  SQL.Clear;
+  SQL.Add('Select * FROM jadwal_tabel WHERE kelas Like' + QuotedStr('%'+Edit1.Text+'%'));
+  Open;
+  end;
+end;
+end;
+
+
+
+procedure TForm5.BitBtn4Click(Sender: TObject);
+begin
+ADOQuery1.SQL.Clear;
+ADOQuery1.SQL.Add('select * from jadwal_tabeL');
+ADOQuery1.Open;
+DBGrid1.Columns[0].Width:=20;
+DBGrid1.Columns[1].Width:=70;
+DBGrid1.Columns[2].Width:=70;
+DBGrid1.Columns[3].Width:=100;
+DBGrid1.Columns[4].Width:=90;
+DBGrid1.Columns[5].Width:=60;
+DBGrid1.Columns[6].Width:=130;
+DBGrid1.Columns[7].Width:=80;
+DBGrid1.Columns[8].Width:=50;
+end;
+
+procedure TForm5.frxReport1ClickObject(View: TfrxView;
+  Button: TMouseButton; Shift: TShiftState; var Modified: Boolean);
+begin
+  if View.Name ='Memo7' then
+  begin
+    ADOQuery2.SQL.Clear;
+    ADOQuery2.SQL.Add('select * from jadwal_tabel where kelas="'+view.TagStr+'"');
+    ADOQuery2.Open;
+
+    frxReport2.ShowReport();
+    end;
+end;
+
+procedure TForm5.BitBtn1Click(Sender: TObject);
+var i:Integer;
+begin
+ADOQuery1.SQL.Clear;
+ADOQuery1.SQL.Add('select Count(no)as jumlah_kelas,sum(kehadiran_total) as total_siswa,kelas as nama_kelas from jadwal_tabel group by kelas');
+ADOQuery1.Open;
+Chart1.Series[0].Clear;
+for i:=1 to ADOQuery1.RecordCount do
+begin
+Chart1.Series[0].Add(StrToInt(ADOQuery1.fieldbyname('total_siswa').AsString),ADOQuery1.Fields[2].AsString);
+ADOQuery1.Next;
+end;
+end;
+
+procedure TForm5.BitBtn5Click(Sender: TObject);
+begin
+frxReport1.ShowReport();
+end;
+
+procedure TForm5.BitBtn2Click(Sender: TObject);
+begin
+tambahdata.ShowModal;
+end;
+
+end.
